@@ -1,6 +1,6 @@
 [project]
 name = "hydraters"
-version = "0.1.0"
+version = "0.0.1"
 description = "Hydrate Python dictionaries with Rust."
 readme = "README.md"
 requires-python = ">=3.8"
