@@ -1,12 +1,22 @@
 [project]
 name = "hydraters"
+version = "0.1.0"
+description = "Hydrate Python dictionaries with Rust."
+readme = "README.md"
 requires-python = ">=3.8"
+license = { file = "LICENSE" }
+authors = [
+    { name = "David Bitner", email = "bitner@dbspatial.com" },
+    { name = "Pete Gadomski", email = "pete.gadomski@gmail.com" },
+]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/gadomski/hydraters"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
@@ -16,8 +26,4 @@ requires = ["maturin>=1.7,<2.0"]
 build-backend = "maturin"
 
 [dependency-groups]
-dev = [
-    "mypy>=1.13.0",
-    "pytest>=8.3.3",
-    "ruff>=0.7.3",
-]
+dev = ["mypy>=1.13.0", "pytest>=8.3.3", "ruff>=0.7.3"]
