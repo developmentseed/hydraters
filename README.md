@@ -1,5 +1,8 @@
 # hydraters
 
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/gadomski/hydraters/ci.yml?style=for-the-badge)](https://github.com/gadomski/hydraters/actions/workflows/ci.yml)
+[![PyPI - Version](https://img.shields.io/pypi/v/hydraters?style=for-the-badge)](https://pypi.org/project/hydraters/)
+
 Hydrate Python dictionaries with Rust.
 A general-purpose algorithm, used in [pgstac](https://github.com/stac-utils/pgstac) to reduce the size of the `items` table.
 
