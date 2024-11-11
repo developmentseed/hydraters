@@ -104,7 +104,7 @@ fn hydrate_dict<'py>(
 }
 
 #[pymodule]
-fn pgstacrs(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn hydraters(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::hydrate, m)?)?;
     Ok(())
 }
