@@ -31,59 +31,44 @@ const MAGIC_MARKER: &str = "𒍟※";
 
 #[pyfunction]
 fn hydrate<'py>(
-    base: &'py Bound<'py, PyAny>,
-    item: &'py Bound<'py, PyAny>,
-) -> PyResult<&'py Bound<'py, PyAny>> {
-    hydrate_any(base, item)
-}
-
-fn hydrate_any<'py>(
-    base: &'py Bound<'py, PyAny>,
-    item: &'py Bound<'py, PyAny>,
-) -> PyResult<&'py Bound<'py, PyAny>> {
-    if let Ok(item) = item.downcast::<PyDict>() {
-        if let Ok(base) = base.downcast::<PyDict>() {
-            Ok(hydrate_dict(base, item)?.as_any())
-        } else if base.is_none() {
-            Ok(item)
-        } else {
-            Err(PyValueError::new_err(
-                "type mismatch: item is a dict, but the base was not",
-            ))
-        }
-    } else if let Ok(item) = item.downcast::<PyList>() {
-        if let Ok(base) = base.downcast::<PyList>() {
-            Ok(hydrate_list(base, item)?.as_any())
-        } else if base.is_none() {
-            Ok(item)
-        } else {
-            Err(PyValueError::new_err(
-                "type mismatch: item is a list, but base is not",
-            ))
-        }
-    } else {
-        Ok(item)
-    }
-}
-
-fn hydrate_list<'py>(
-    base: &'py Bound<'py, PyList>,
-    item: &'py Bound<'py, PyList>,
-) -> PyResult<&'py Bound<'py, PyList>> {
-    for i in 0..item.len() {
-        if i >= base.len() {
-            return Ok(item);
-        } else {
-            item.set_item(i, hydrate(&base.get_item(i)?, &item.get_item(i)?)?)?;
-        }
-    }
-    Ok(item)
-}
-
-fn hydrate_dict<'py>(
     base: &'py Bound<'py, PyDict>,
     item: &'py Bound<'py, PyDict>,
 ) -> PyResult<&'py Bound<'py, PyDict>> {
+    hydrate_dict(base, item)?;
+    Ok(item)
+}
+
+fn hydrate_any<'py>(base: &'py Bound<'py, PyAny>, item: &'py Bound<'py, PyAny>) -> PyResult<()> {
+    if let Ok(item) = item.downcast::<PyDict>() {
+        if let Ok(base) = base.downcast::<PyDict>() {
+            hydrate_dict(base, item)?;
+        } else {
+            return Err(PyValueError::new_err(
+                "type mismatch: item is a dict, but the base was not",
+            ));
+        }
+    } else if let Ok(item) = item.downcast::<PyList>() {
+        if let Ok(base) = base.downcast::<PyList>() {
+            hydrate_list(base, item)?;
+        } else {
+            return Err(PyValueError::new_err(
+                "type mismatch: item is a list, but base is not",
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn hydrate_list<'py>(base: &'py Bound<'py, PyList>, item: &'py Bound<'py, PyList>) -> PyResult<()> {
+    if base.len() == item.len() {
+        for (base_value, item_value) in base.iter().zip(item.iter()) {
+            hydrate_any(&base_value, &item_value)?;
+        }
+    }
+    Ok(())
+}
+
+fn hydrate_dict<'py>(base: &'py Bound<'py, PyDict>, item: &'py Bound<'py, PyDict>) -> PyResult<()> {
     for (key, base_value) in base {
         if let Some(item_value) = item.get_item(&key)? {
             if item_value
@@ -94,13 +79,13 @@ fn hydrate_dict<'py>(
             {
                 item.del_item(key)?;
             } else {
-                item.set_item(&key, hydrate(&base_value, &item_value)?)?;
+                hydrate_any(&base_value, &item_value)?;
             }
         } else {
             item.set_item(key, base_value)?;
         }
     }
-    Ok(item)
+    Ok(())
 }
 
 #[pyfunction]
@@ -112,7 +97,6 @@ fn dehydrate<'py>(
     Ok(item)
 }
 
-#[pyfunction]
 fn dehydrate_dict<'py>(
     base: &'py Bound<'py, PyDict>,
     item: &'py Bound<'py, PyDict>,
