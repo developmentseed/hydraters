@@ -1,6 +1,4 @@
-import json
-from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import hydraters
 import pytest
@@ -9,11 +7,6 @@ import pytest
 @pytest.fixture
 def base() -> dict[str, Any]:
     return {"a": "first", "b": "second", "c": "third"}
-
-
-def load_json(path: Path) -> dict[str, Any]:
-    with open(Path(__file__).parent / "data" / path) as f:
-        return cast(dict[str, Any], json.load(f))
 
 
 def test_equal_hydrate(base: dict[str, Any]) -> None:
