@@ -1,6 +1,6 @@
 # hydraters
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/gadomski/hydraters/ci.yml?style=for-the-badge)](https://github.com/gadomski/hydraters/actions/workflows/ci.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/developmentseed/hydraters/ci.yml?style=for-the-badge)](https://github.com/developmentseed/hydraters/actions/workflows/ci.yml)
 [![PyPI - Version](https://img.shields.io/pypi/v/hydraters?style=for-the-badge)](https://pypi.org/project/hydraters/)
 
 Hydrate Python dictionaries with Rust.
@@ -23,6 +23,24 @@ assert result == {
 
 ```shell
 python -m pip install hydraters
+```
+
+## Developing
+
+Get [Rust](https://rustup.rs/) and [uv](https://docs.astral.sh/uv/getting-started/installation/).
+Then:
+
+```shell
+git clone git@github.com:developmentseed/hydraters.git
+cd hydraters
+uv sync
+uv run pre-commit install
+```
+
+To run tests:
+
+```shell
+uv run pytest
 ```
 
 ## Background
