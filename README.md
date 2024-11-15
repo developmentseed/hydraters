@@ -25,6 +25,12 @@ assert result == {
 python -m pip install hydraters
 ```
 
+Or, if you're using **uv**:
+
+```shell
+uv add hydraters
+```
+
 ## Developing
 
 Get [Rust](https://rustup.rs/) and [uv](https://docs.astral.sh/uv/getting-started/installation/).
