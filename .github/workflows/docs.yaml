@@ -1,0 +1,26 @@
+name: Docs
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  docs:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v3
+      - run: uv sync
+      - run: uv run maturin develop
+      - env:
+          GIT_COMMITTER_NAME: CI
+          GIT_COMMITTER_EMAIL: ci-bot@example.com
+        run: uv run mike deploy ${{ github.ref_name}} latest --update-aliases --push
