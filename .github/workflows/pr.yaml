@@ -10,6 +10,14 @@ jobs:
   ci:
     name: CI
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: # https://scientific-python.org/specs/spec-0000/
+          - "3.11"
+          - "3.12"
+          - "3.13"
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
