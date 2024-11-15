@@ -13,10 +13,16 @@ classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 [project.urls]
-Repository = "https://github.com/gadomski/hydraters"
+Repository = "https://github.com/developmentseed/hydraters"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
@@ -26,9 +32,4 @@ requires = ["maturin>=1.7,<2.0"]
 build-backend = "maturin"
 
 [dependency-groups]
-dev = [
-    "mypy>=1.13.0",
-    "pre-commit>=3.5.0",
-    "pytest>=8.3.3",
-    "ruff>=0.7.3",
-]
+dev = ["mypy>=1.13.0", "pre-commit>=3.5.0", "pytest>=8.3.3", "ruff>=0.7.3"]
