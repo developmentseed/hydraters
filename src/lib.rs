@@ -103,8 +103,60 @@ fn hydrate_dict<'py>(
     Ok(item)
 }
 
+#[pyfunction]
+fn dehydrate<'py>(
+    base: &'py Bound<'py, PyDict>,
+    item: &'py Bound<'py, PyDict>,
+) -> PyResult<&'py Bound<'py, PyDict>> {
+    dehydrate_dict(base, item)?;
+    Ok(item)
+}
+
+#[pyfunction]
+fn dehydrate_dict<'py>(
+    base: &'py Bound<'py, PyDict>,
+    item: &'py Bound<'py, PyDict>,
+) -> PyResult<()> {
+    for (key, base_value) in base {
+        if let Some(item_value) = item.get_item(&key)? {
+            if base_value.eq(&item_value)? {
+                item.del_item(key)?;
+            } else if let Ok(item_value) = item_value.downcast::<PyList>() {
+                if let Ok(base_value) = base_value.downcast::<PyList>() {
+                    dehydrate_list(base_value, item_value)?;
+                }
+            } else if let Ok(item_value) = item_value.downcast::<PyDict>() {
+                if let Ok(base_value) = base_value.downcast::<PyDict>() {
+                    dehydrate_dict(base_value, item_value)?;
+                }
+            }
+        } else {
+            item.set_item(key, MAGIC_MARKER)?;
+        }
+    }
+    Ok(())
+}
+
+fn dehydrate_list<'py>(
+    base: &'py Bound<'py, PyList>,
+    item: &'py Bound<'py, PyList>,
+) -> PyResult<()> {
+    if base.len() == item.len() {
+        for (base_value, item_value) in base.iter().zip(item.iter()) {
+            if let Ok(base_value) = base_value.downcast::<PyDict>() {
+                if let Ok(item_value) = item_value.downcast::<PyDict>() {
+                    dehydrate_dict(base_value, item_value)?;
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 #[pymodule]
 fn hydraters(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add("DO_NOT_MERGE_MARKER", MAGIC_MARKER)?;
     m.add_function(wrap_pyfunction!(crate::hydrate, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::dehydrate, m)?)?;
     Ok(())
 }
