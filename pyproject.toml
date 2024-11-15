@@ -26,4 +26,9 @@ requires = ["maturin>=1.7,<2.0"]
 build-backend = "maturin"
 
 [dependency-groups]
-dev = ["mypy>=1.13.0", "pytest>=8.3.3", "ruff>=0.7.3"]
+dev = [
+    "mypy>=1.13.0",
+    "pre-commit>=3.5.0",
+    "pytest>=8.3.3",
+    "ruff>=0.7.3",
+]

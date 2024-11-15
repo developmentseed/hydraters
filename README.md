@@ -25,6 +25,24 @@ assert result == {
 python -m pip install hydraters
 ```
 
+## Developing
+
+Get [Rust](https://rustup.rs/) and [uv](https://docs.astral.sh/uv/getting-started/installation/).
+Then:
+
+```shell
+git clone git@github.com:developmentseed/hydraters.git
+cd hydraters
+uv sync
+uv run pre-commit install
+```
+
+To run tests:
+
+```shell
+uv run pytest
+```
+
 ## Background
 
 The code for this package was taken from [pypgstac](https://github.com/stac-utils/pgstac/blob/f1d71d5e00392acb970e3b19a62d5f1aa8d50cc6/src/pypgstac/src/lib.rs).
