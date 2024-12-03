@@ -43,7 +43,7 @@ fn hydrate_any<'py>(base: &'py Bound<'py, PyAny>, item: &'py Bound<'py, PyAny>) 
         if let Ok(base) = base.downcast::<PyDict>() {
             hydrate_dict(base, item)?;
         } else if base.is_none() {
-            hydrate_dict(&PyDict::new_bound(base.py()), item)?;
+            hydrate_dict(&PyDict::new(base.py()), item)?;
         } else {
             return Err(PyValueError::new_err(
                 "type mismatch: item is a dict, but the base was not",
@@ -54,7 +54,7 @@ fn hydrate_any<'py>(base: &'py Bound<'py, PyAny>, item: &'py Bound<'py, PyAny>) 
             hydrate_list(base, item)?;
         } else if base.is_none() {
             let empty_list: [&str; 0] = [];
-            hydrate_list(&PyList::new_bound(base.py(), &empty_list), item)?;
+            hydrate_list(&PyList::new(base.py(), &empty_list)?, item)?;
         } else {
             return Err(PyValueError::new_err(
                 "type mismatch: item is a list, but base is not",
