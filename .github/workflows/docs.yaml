@@ -2,12 +2,17 @@ name: Docs
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
   pages: write
+
+concurrency:
+  group: "docs"
+  cancel-in-progress: true
 
 jobs:
   docs:
@@ -19,8 +24,10 @@ jobs:
           fetch-depth: 0
       - uses: astral-sh/setup-uv@v4
       - run: uv sync
-      - run: uv run maturin develop
+      - run: uv run maturin develop --uv
       - env:
           GIT_COMMITTER_NAME: CI
           GIT_COMMITTER_EMAIL: ci-bot@example.com
-        run: uv run mike deploy ${{ github.ref_name}} latest --update-aliases --push
+        run: |
+          VERSION=$(git describe --tags --match="v*" --abbrev=0)
+          uv run mike deploy $VERSION latest --update-aliases --push
