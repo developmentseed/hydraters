@@ -39,8 +39,8 @@ fn hydrate<'py>(
 }
 
 fn hydrate_any<'py>(base: &'py Bound<'py, PyAny>, item: &'py Bound<'py, PyAny>) -> PyResult<()> {
-    if let Ok(item) = item.downcast::<PyDict>() {
-        if let Ok(base) = base.downcast::<PyDict>() {
+    if let Ok(item) = item.cast::<PyDict>() {
+        if let Ok(base) = base.cast::<PyDict>() {
             hydrate_dict(base, item)?;
         } else if base.is_none() {
             hydrate_dict(&PyDict::new(base.py()), item)?;
@@ -49,8 +49,8 @@ fn hydrate_any<'py>(base: &'py Bound<'py, PyAny>, item: &'py Bound<'py, PyAny>) 
                 "type mismatch: item is a dict, but the base was not",
             ));
         }
-    } else if let Ok(item) = item.downcast::<PyList>() {
-        if let Ok(base) = base.downcast::<PyList>() {
+    } else if let Ok(item) = item.cast::<PyList>() {
+        if let Ok(base) = base.cast::<PyList>() {
             hydrate_list(base, item)?;
         } else if base.is_none() {
             let empty_list: [&str; 0] = [];
@@ -110,12 +110,12 @@ fn dehydrate_dict<'py>(
         if let Some(item_value) = item.get_item(&key)? {
             if base_value.eq(&item_value)? {
                 item.del_item(key)?;
-            } else if let Ok(item_value) = item_value.downcast::<PyList>() {
-                if let Ok(base_value) = base_value.downcast::<PyList>() {
+            } else if let Ok(item_value) = item_value.cast::<PyList>() {
+                if let Ok(base_value) = base_value.cast::<PyList>() {
                     dehydrate_list(base_value, item_value)?;
                 }
-            } else if let Ok(item_value) = item_value.downcast::<PyDict>() {
-                if let Ok(base_value) = base_value.downcast::<PyDict>() {
+            } else if let Ok(item_value) = item_value.cast::<PyDict>() {
+                if let Ok(base_value) = base_value.cast::<PyDict>() {
                     dehydrate_dict(base_value, item_value)?;
                 }
             }
@@ -132,8 +132,8 @@ fn dehydrate_list<'py>(
 ) -> PyResult<()> {
     if base.len() == item.len() {
         for (base_value, item_value) in base.iter().zip(item.iter()) {
-            if let Ok(base_value) = base_value.downcast::<PyDict>() {
-                if let Ok(item_value) = item_value.downcast::<PyDict>() {
+            if let Ok(base_value) = base_value.cast::<PyDict>() {
+                if let Ok(item_value) = item_value.cast::<PyDict>() {
                     dehydrate_dict(base_value, item_value)?;
                 }
             }
