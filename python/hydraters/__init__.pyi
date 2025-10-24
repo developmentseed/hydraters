@@ -40,7 +40,6 @@ def dehydrate(base: dict[str, Any], item: dict[str, Any]) -> dict[str, Any]:
         The dehydrated item.
     """
 
-
 def strip_merge_markers(item: dict[str, Any]) -> dict[str, Any]:
     """Remove ``DO_NOT_MERGE_MARKER`` entries and warn with their paths.
 
