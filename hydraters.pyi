@@ -18,7 +18,7 @@ def hydrate(
             The item to hydrate. The item is mutated in-place and also returned.
         strip_unmatched_markers:
             When ``True`` the hydrated item is passed through
-            :func:`strip_unmatched_markers` before being returned, emitting the same
+            [strip_unmatched_markers][hydraters.strip_unmatched_markers] before being returned, emitting the same
             warning and removing any lingering markers.
 
     Returns:
