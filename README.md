@@ -21,9 +21,9 @@ assert result == {
 ```
 
 If you want to clean out any lingering ``DO_NOT_MERGE_MARKER`` entries after
-hydration, pass ``strip_merge_markers=True``. This will call
-``hydraters.strip_merge_markers`` on the hydrated item before it is returned
-and will emit the same warning when markers are stripped.
+hydration, pass ``strip_unmatched_markers=True``. This will call
+``hydraters.strip_unmatched_markers`` on the hydrated item before it is
+returned and will emit the same warning when markers are stripped.
 
 ```python
 import warnings
@@ -33,7 +33,7 @@ item = {"a": hydraters.DO_NOT_MERGE_MARKER, "b": {"c": "value"}}
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    hydraters.hydrate({}, item, strip_merge_markers=True)
+    hydraters.hydrate({}, item, strip_unmatched_markers=True)
 
 assert item == {"b": {"c": "value"}}
 ```
@@ -48,7 +48,7 @@ item = {
     "b": {"c": hydraters.DO_NOT_MERGE_MARKER, "d": 1},
 }
 
-hydraters.strip_merge_markers(item)
+hydraters.strip_unmatched_markers(item)
 assert item == {"b": {"d": 1}}
 ```
 

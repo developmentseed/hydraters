@@ -81,7 +81,9 @@ fn strip_marker_paths_in_dict<'py>(
 }
 
 #[pyfunction]
-fn strip_merge_markers<'py>(item: &'py Bound<'py, PyDict>) -> PyResult<&'py Bound<'py, PyDict>> {
+fn strip_unmatched_markers<'py>(
+    item: &'py Bound<'py, PyDict>,
+) -> PyResult<&'py Bound<'py, PyDict>> {
     let mut removed_paths = Vec::new();
     strip_marker_paths_in_dict(item, "$", &mut removed_paths)?;
     if !removed_paths.is_empty() {
@@ -96,11 +98,16 @@ fn strip_merge_markers<'py>(item: &'py Bound<'py, PyDict>) -> PyResult<&'py Boun
 }
 
 #[pyfunction]
+#[pyo3(signature = (base, item, strip_unmatched_markers = false))]
 fn hydrate<'py>(
     base: &'py Bound<'py, PyDict>,
     item: &'py Bound<'py, PyDict>,
+    strip_unmatched_markers: bool,
 ) -> PyResult<&'py Bound<'py, PyDict>> {
     hydrate_dict(base, item)?;
+    if strip_unmatched_markers {
+        let _ = crate::strip_unmatched_markers(item)?;
+    }
     Ok(item)
 }
 
@@ -213,6 +220,6 @@ fn hydraters(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("DO_NOT_MERGE_MARKER", MAGIC_MARKER)?;
     m.add_function(wrap_pyfunction!(crate::hydrate, m)?)?;
     m.add_function(wrap_pyfunction!(crate::dehydrate, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::strip_merge_markers, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::strip_unmatched_markers, m)?)?;
     Ok(())
 }

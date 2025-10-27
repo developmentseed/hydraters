@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `strip_merge_markers` helper removes ``DO_NOT_MERGE_MARKER`` keys and emits
+- `strip_unmatched_markers` helper removes ``DO_NOT_MERGE_MARKER`` keys and emits
 	a warning listing JSONPath-style locations.
-- `hydrate` now accepts a `strip_merge_markers` flag to apply the helper
+- `hydrate` now accepts a `strip_unmatched_markers` flag to apply the helper
 	automatically after hydration.
 
 ## [0.1.2] - 2024-12-03

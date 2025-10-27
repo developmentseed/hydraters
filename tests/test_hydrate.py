@@ -183,7 +183,7 @@ def test_hydrate_default_does_not_strip_markers() -> None:
     assert hydrated == {"remove": DO_NOT_MERGE_MARKER, "base": "value"}
 
 
-def test_hydrate_strip_merge_markers_option() -> None:
+def test_hydrate_strip_unmatched_markers_option() -> None:
     base_item = {"base": "value"}
     dehydrated: dict[str, Any] = {
         "remove": DO_NOT_MERGE_MARKER,
@@ -192,12 +192,16 @@ def test_hydrate_strip_merge_markers_option() -> None:
     }
 
     with pytest.warns(UserWarning, match=r"\$\.remove, \$\.nested\.also"):
-        hydrated = hydraters.hydrate(base_item, dehydrated, strip_merge_markers=True)
+        hydrated = hydraters.hydrate(
+            base_item,
+            dehydrated,
+            strip_unmatched_markers=True,
+        )
 
     assert hydrated == {"keep": "value", "nested": {}, "base": "value"}
 
 
-def test_strip_merge_markers_warns_and_removes() -> None:
+def test_strip_unmatched_markers_warns_and_removes() -> None:
     item: dict[str, Any] = {
         "a": DO_NOT_MERGE_MARKER,
         "b": {"c": DO_NOT_MERGE_MARKER, "d": 1},
@@ -205,17 +209,17 @@ def test_strip_merge_markers_warns_and_removes() -> None:
     }
 
     with pytest.warns(UserWarning, match=r"\$\.a, \$\.b\.c, \$\.e\[0\]\.f"):
-        result = hydraters.strip_merge_markers(item)
+        result = hydraters.strip_unmatched_markers(item)
 
     assert result == {"b": {"d": 1}, "e": [{}, {"g": "keep"}]}
 
 
-def test_strip_merge_markers_noop_without_marker() -> None:
+def test_strip_unmatched_markers_noop_without_marker() -> None:
     item = {"value": "base"}
 
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
-        result = hydraters.strip_merge_markers(item)
+        result = hydraters.strip_unmatched_markers(item)
 
     assert not caught
     assert result == {"value": "base"}
