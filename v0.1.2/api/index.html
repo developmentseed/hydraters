@@ -403,6 +403,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#hydraters.strip_unmatched_markers" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;strip_unmatched_markers
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -464,6 +473,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#hydraters.strip_unmatched_markers" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;strip_unmatched_markers
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -511,7 +529,7 @@
           –
           <div class="doc-md-description">
             <p>The base item to use for dehydration. Any values that are equal on
-the base and the itm will be removed from the item.</p>
+the base and the item will be removed from the item.</p>
           </div>
         </li>
         <li class="doc-section-item field-body">
@@ -550,7 +568,11 @@ returned.</p>
 
 
 <a href="#hydraters.hydrate" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">hydrate</span><span class="p">(</span><span class="n">base</span><span class="p">:</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">],</span> <span class="n">item</span><span class="p">:</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">]</span>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">hydrate</span><span class="p">(</span>
+    <span class="n">base</span><span class="p">:</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">],</span>
+    <span class="n">item</span><span class="p">:</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">],</span>
+    <span class="n">strip_unmatched_markers</span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -575,6 +597,18 @@ not on the item will be added back to the item.</p>
           –
           <div class="doc-md-description">
             <p>The item to hydrate. The item is mutated in-place and also returned.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>strip_unmatched_markers</code></b>
+              (<code><span title="bool">bool</span></code>, default:
+                  <code>False</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>When <code>True</code> the hydrated item is passed through
+<a class="autorefs autorefs-internal" title="hydraters.strip_unmatched_markers" href="#hydraters.strip_unmatched_markers">strip_unmatched_markers</a> before being returned, emitting the same
+warning and removing any lingering markers.</p>
           </div>
         </li>
     </ul>
@@ -615,6 +649,53 @@ not on the item will be added back to the item.</p>
     <div class="doc doc-contents first">
 
         <p>The magic marker that is used to indicate that a field should not be merged.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hydraters.strip_unmatched_markers" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">hydraters.strip_unmatched_markers</span>
+
+
+<a href="#hydraters.strip_unmatched_markers" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature codehilite"><pre><span></span><code><span class="nf">strip_unmatched_markers</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="typing.Any">Any</span></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents first">
+
+        <p>Remove <code>DO_NOT_MERGE_MARKER</code> entries and warn with their paths.</p>
+<p>The removal applies recursively. Paths are emitted using JSONPath dot
+notation like <code>$.a.b</code> or <code>$.assets[0].href</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>item</code></b>
+              (<code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>)
+          –
+          <div class="doc-md-description">
+            <p>The dictionary to mutate in-place.</p>
+          </div>
+        </li>
+    </ul>
+
+
+<p><span class="doc-section-title">Returns:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+              <code><span title="dict">dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]</code>
+          –
+          <div class="doc-md-description">
+            <p>The same dictionary object with marker entries removed.</p>
+          </div>
+        </li>
+    </ul>
+
 
     </div>
 

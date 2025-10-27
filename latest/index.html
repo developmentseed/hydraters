@@ -510,12 +510,38 @@ A general-purpose algorithm, used in <a href="https://github.com/stac-utils/pgst
 
 <span class="n">base</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="s2">&quot;second&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="s2">&quot;third&quot;</span><span class="p">}}</span>
 <span class="n">item</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="s2">&quot;fourth&quot;</span><span class="p">,</span> <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="s2">&quot;fifth&quot;</span><span class="p">}}</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">hyrdraters</span><span class="o">.</span><span class="n">hydrate</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">hydraters</span><span class="o">.</span><span class="n">hydrate</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
 <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="p">{</span>
     <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span>
     <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="s2">&quot;second&quot;</span><span class="p">,</span>
     <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="s2">&quot;third&quot;</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="s2">&quot;fourth&quot;</span><span class="p">,</span> <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="s2">&quot;fifth&quot;</span><span class="p">},</span>
 <span class="p">}</span>
+</code></pre></div>
+<p>If you want to clean out any lingering <code>DO_NOT_MERGE_MARKER</code> entries after
+hydration, pass <code>strip_unmatched_markers=True</code>. This will call
+<code>hydraters.strip_unmatched_markers</code> on the hydrated item before it is
+returned and will emit the same warning when markers are stripped.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hydraters</span>
+
+<span class="n">item</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">hydraters</span><span class="o">.</span><span class="n">DO_NOT_MERGE_MARKER</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">}}</span>
+
+<span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+    <span class="n">hydraters</span><span class="o">.</span><span class="n">hydrate</span><span class="p">({},</span> <span class="n">item</span><span class="p">,</span> <span class="n">strip_unmatched_markers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">item</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">}}</span>
+</code></pre></div>
+<p>Strip existing data back to a clean state by removing any keys whose value is
+<code>DO_NOT_MERGE_MARKER</code>. A warning lists every stripped path using JSONPath
+dot notation (for example <code>$.assets[0].href</code>).</p>
+<div class="highlight"><pre><span></span><code><span class="n">item</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">hydraters</span><span class="o">.</span><span class="n">DO_NOT_MERGE_MARKER</span><span class="p">,</span>
+    <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">hydraters</span><span class="o">.</span><span class="n">DO_NOT_MERGE_MARKER</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">hydraters</span><span class="o">.</span><span class="n">strip_unmatched_markers</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">item</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}}</span>
 </code></pre></div>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>hydraters
