@@ -3,7 +3,11 @@ from typing import Any
 DO_NOT_MERGE_MARKER: str
 """The magic marker that is used to indicate that a field should not be merged."""
 
-def hydrate(base: dict[str, Any], item: dict[str, Any]) -> dict[str, Any]:
+def hydrate(
+    base: dict[str, Any],
+    item: dict[str, Any],
+    strip_unmatched_markers: bool = False,
+) -> dict[str, Any]:
     """Hydrates an item using a base.
 
     Args:
@@ -12,6 +16,10 @@ def hydrate(base: dict[str, Any], item: dict[str, Any]) -> dict[str, Any]:
             not on the item will be added back to the item.
         item:
             The item to hydrate. The item is mutated in-place and also returned.
+        strip_unmatched_markers:
+            When ``True`` the hydrated item is passed through
+            [strip_unmatched_markers][hydraters.strip_unmatched_markers] before being returned, emitting the same
+            warning and removing any lingering markers.
 
     Returns:
         The hydrated item.
@@ -23,11 +31,25 @@ def dehydrate(base: dict[str, Any], item: dict[str, Any]) -> dict[str, Any]:
     Args:
         base:
             The base item to use for dehydration. Any values that are equal on
-            the base and the itm will be removed from the item.
+            the base and the item will be removed from the item.
         item:
             The item to be dehydrated. The item is mutated in-place, and also
             returned.
 
     Returns:
         The dehydrated item.
+    """
+
+def strip_unmatched_markers(item: dict[str, Any]) -> dict[str, Any]:
+    """Remove ``DO_NOT_MERGE_MARKER`` entries and warn with their paths.
+
+    The removal applies recursively. Paths are emitted using JSONPath dot
+    notation like ``$.a.b`` or ``$.assets[0].href``.
+
+    Args:
+        item:
+            The dictionary to mutate in-place.
+
+    Returns:
+        The same dictionary object with marker entries removed.
     """

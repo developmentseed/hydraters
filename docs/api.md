@@ -7,3 +7,5 @@ The **hydraters** API.
 ::: hydraters.hydrate
 
 ::: hydraters.DO_NOT_MERGE_MARKER
+
+::: hydraters.strip_unmatched_markers

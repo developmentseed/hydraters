@@ -11,12 +11,45 @@ import hydraters
 
 base = {"a": "first", "b": "second", "c": {"d": "third"}}
 item = {"c": {"e": "fourth", "f": "fifth"}}
-result = hyrdraters.hydrate(base, item)
+result = hydraters.hydrate(base, item)
 assert result == {
     "a": "first",
     "b": "second",
     "c": {"d": "third", "e": "fourth", "f": "fifth"},
 }
+
+```
+
+If you want to clean out any lingering ``DO_NOT_MERGE_MARKER`` entries after
+hydration, pass ``strip_unmatched_markers=True``. This will call
+``hydraters.strip_unmatched_markers`` on the hydrated item before it is
+returned and will emit the same warning when markers are stripped.
+
+```python
+import warnings
+import hydraters
+
+item = {"a": hydraters.DO_NOT_MERGE_MARKER, "b": {"c": "value"}}
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    hydraters.hydrate({}, item, strip_unmatched_markers=True)
+
+assert item == {"b": {"c": "value"}}
+```
+
+Strip existing data back to a clean state by removing any keys whose value is
+``DO_NOT_MERGE_MARKER``. A warning lists every stripped path using JSONPath
+dot notation (for example ``$.assets[0].href``).
+
+```python
+item = {
+    "a": hydraters.DO_NOT_MERGE_MARKER,
+    "b": {"c": hydraters.DO_NOT_MERGE_MARKER, "d": 1},
+}
+
+hydraters.strip_unmatched_markers(item)
+assert item == {"b": {"d": 1}}
 ```
 
 ## Installation

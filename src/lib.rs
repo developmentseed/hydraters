@@ -29,12 +29,85 @@ use pyo3::{
 
 const MAGIC_MARKER: &str = "𒍟※";
 
+fn is_magic_marker(value: &Bound<'_, PyAny>) -> bool {
+    value
+        .extract::<PyBackedStr>()
+        .ok()
+        .map(|s| <PyBackedStr as AsRef<str>>::as_ref(&s) == MAGIC_MARKER)
+        .unwrap_or(false)
+}
+
+fn strip_marker_paths_in_list<'py>(
+    list: &'py Bound<'py, PyList>,
+    base_path: &str,
+    removed_paths: &mut Vec<String>,
+) -> PyResult<()> {
+    for (index, value) in list.iter().enumerate() {
+        let next_path = format!("{base_path}[{index}]");
+        if let Ok(dict) = value.downcast::<PyDict>() {
+            strip_marker_paths_in_dict(&dict, &next_path, removed_paths)?;
+        } else if let Ok(sub_list) = value.downcast::<PyList>() {
+            strip_marker_paths_in_list(&sub_list, &next_path, removed_paths)?;
+        }
+    }
+    Ok(())
+}
+
+fn strip_marker_paths_in_dict<'py>(
+    dict: &'py Bound<'py, PyDict>,
+    base_path: &str,
+    removed_paths: &mut Vec<String>,
+) -> PyResult<()> {
+    let py = dict.py();
+    let mut keys_to_remove: Vec<Py<PyAny>> = Vec::new();
+    for (key, value) in dict {
+        let key_segment = key.str()?.to_str()?.to_owned();
+        let next_path = format!("{base_path}.{key_segment}");
+        if is_magic_marker(&value) {
+            removed_paths.push(next_path);
+            keys_to_remove.push(key.unbind());
+            continue;
+        }
+        if let Ok(sub_dict) = value.downcast::<PyDict>() {
+            strip_marker_paths_in_dict(&sub_dict, &next_path, removed_paths)?;
+        } else if let Ok(sub_list) = value.downcast::<PyList>() {
+            strip_marker_paths_in_list(&sub_list, &next_path, removed_paths)?;
+        }
+    }
+    for key in keys_to_remove {
+        dict.del_item(key.bind(py))?;
+    }
+    Ok(())
+}
+
 #[pyfunction]
+fn strip_unmatched_markers<'py>(
+    item: &'py Bound<'py, PyDict>,
+) -> PyResult<&'py Bound<'py, PyDict>> {
+    let mut removed_paths = Vec::new();
+    strip_marker_paths_in_dict(item, "$", &mut removed_paths)?;
+    if !removed_paths.is_empty() {
+        let message = format!(
+            "Stripped DO_NOT_MERGE_MARKER from: {}",
+            removed_paths.join(", ")
+        );
+        let warnings = item.py().import("warnings")?;
+        let _ = warnings.call_method1("warn", (message,))?;
+    }
+    Ok(item)
+}
+
+#[pyfunction]
+#[pyo3(signature = (base, item, strip_unmatched_markers = false))]
 fn hydrate<'py>(
     base: &'py Bound<'py, PyDict>,
     item: &'py Bound<'py, PyDict>,
+    strip_unmatched_markers: bool,
 ) -> PyResult<&'py Bound<'py, PyDict>> {
     hydrate_dict(base, item)?;
+    if strip_unmatched_markers {
+        let _ = crate::strip_unmatched_markers(item)?;
+    }
     Ok(item)
 }
 
@@ -147,5 +220,6 @@ fn hydraters(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("DO_NOT_MERGE_MARKER", MAGIC_MARKER)?;
     m.add_function(wrap_pyfunction!(crate::hydrate, m)?)?;
     m.add_function(wrap_pyfunction!(crate::dehydrate, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::strip_unmatched_markers, m)?)?;
     Ok(())
 }

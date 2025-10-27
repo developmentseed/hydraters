@@ -1,5 +1,9 @@
 from typing import Any
 
+import warnings
+
+import pytest
+
 import hydraters
 from hydraters import DO_NOT_MERGE_MARKER
 
@@ -165,3 +169,57 @@ def test_base_none() -> None:
     dehydrated = {"value": {"a": "b"}}
     hydrated = hydraters.hydrate(base_item, dehydrated)
     assert hydrated == {"value": {"a": "b"}}
+
+
+def test_hydrate_default_does_not_strip_markers() -> None:
+    base_item = {"base": "value"}
+    dehydrated = {"remove": DO_NOT_MERGE_MARKER}
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        hydrated = hydraters.hydrate(base_item, dehydrated)
+
+    assert not caught
+    assert hydrated == {"remove": DO_NOT_MERGE_MARKER, "base": "value"}
+
+
+def test_hydrate_strip_unmatched_markers_option() -> None:
+    base_item = {"base": "value"}
+    dehydrated: dict[str, Any] = {
+        "remove": DO_NOT_MERGE_MARKER,
+        "keep": "value",
+        "nested": {"also": DO_NOT_MERGE_MARKER},
+    }
+
+    with pytest.warns(UserWarning, match=r"\$\.remove, \$\.nested\.also"):
+        hydrated = hydraters.hydrate(
+            base_item,
+            dehydrated,
+            strip_unmatched_markers=True,
+        )
+
+    assert hydrated == {"keep": "value", "nested": {}, "base": "value"}
+
+
+def test_strip_unmatched_markers_warns_and_removes() -> None:
+    item: dict[str, Any] = {
+        "a": DO_NOT_MERGE_MARKER,
+        "b": {"c": DO_NOT_MERGE_MARKER, "d": 1},
+        "e": [{"f": DO_NOT_MERGE_MARKER}, {"g": "keep"}],
+    }
+
+    with pytest.warns(UserWarning, match=r"\$\.a, \$\.b\.c, \$\.e\[0\]\.f"):
+        result = hydraters.strip_unmatched_markers(item)
+
+    assert result == {"b": {"d": 1}, "e": [{}, {"g": "keep"}]}
+
+
+def test_strip_unmatched_markers_noop_without_marker() -> None:
+    item = {"value": "base"}
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        result = hydraters.strip_unmatched_markers(item)
+
+    assert not caught
+    assert result == {"value": "base"}
