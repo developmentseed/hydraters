@@ -44,9 +44,9 @@ fn strip_marker_paths_in_list<'py>(
 ) -> PyResult<()> {
     for (index, value) in list.iter().enumerate() {
         let next_path = format!("{base_path}[{index}]");
-        if let Ok(dict) = value.downcast::<PyDict>() {
+        if let Ok(dict) = value.cast::<PyDict>() {
             strip_marker_paths_in_dict(&dict, &next_path, removed_paths)?;
-        } else if let Ok(sub_list) = value.downcast::<PyList>() {
+        } else if let Ok(sub_list) = value.cast::<PyList>() {
             strip_marker_paths_in_list(&sub_list, &next_path, removed_paths)?;
         }
     }
@@ -68,9 +68,9 @@ fn strip_marker_paths_in_dict<'py>(
             keys_to_remove.push(key.unbind());
             continue;
         }
-        if let Ok(sub_dict) = value.downcast::<PyDict>() {
+        if let Ok(sub_dict) = value.cast::<PyDict>() {
             strip_marker_paths_in_dict(&sub_dict, &next_path, removed_paths)?;
-        } else if let Ok(sub_list) = value.downcast::<PyList>() {
+        } else if let Ok(sub_list) = value.cast::<PyList>() {
             strip_marker_paths_in_list(&sub_list, &next_path, removed_paths)?;
         }
     }
